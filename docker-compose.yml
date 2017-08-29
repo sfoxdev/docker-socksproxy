@@ -1,0 +1,73 @@
+version: "2"
+
+services:
+
+    phpmyadmin:
+      container_name: phpmyadmin
+      image: phpmyadmin/phpmyadmin
+      restart: always
+      ports:
+        - "8080:80"
+      environment:
+        - PMA_ARBITRARY=1
+        - PMA_HOST=mysql
+        - MYSQL_USERNAME=root
+        - MYSQL_ROOT_PASSWORD=Gt3ds59Mdsm-d
+      networks:
+        - dante-net
+
+    mysql:
+      container_name: mysql
+      image: mysql
+      restart: always
+      user: "1000"
+      volumes:
+        - /srv/socks/mysql:/var/lib/mysql
+        - /srv/socks/etc/mysql:/etc/mysql/conf.d
+      environment:
+        - MYSQL_USER=root
+        - MYSQL_ROOT_PASSWORD=Gt3ds59Mdsm-d
+      networks:
+        - dante-net
+
+    freeradius:
+      container_name: freeradius
+      build: freeradius
+      image: sfoxdev/freeradius
+      restart: always
+      env_file:
+        - database.env
+      environment:
+        - SECRET=Ptdn64Hsk3
+#      volumes:
+#        - /var/lib/mysql/mysql.sock:/var/run/mysqld/mysqld.sock
+      networks:
+        - dante-net
+
+    dante:
+      container_name: dante
+      build: dante
+      image: sfoxdev/dante
+      restart: always
+      ports:
+        - "1080:1080"
+      environment:
+        - SECRET=Ptdn64Hsk3
+      networks:
+        - dante-net
+
+    daloradius:
+      container_name: daloradius
+      build: daloradius
+      image: sfoxdev/daloradius
+      restart: always
+      ports:
+        - "80:80"
+      env_file:
+        - database.env
+      networks:
+        - dante-net
+
+networks:
+    dante-net:
+      driver: bridge
